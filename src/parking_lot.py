@@ -14,7 +14,7 @@ class ParkingCommands(object):
         file_obj = open(given_file)
         try:
             while True:
-                line = next(file_obj)
+                line = file_obj.readline()
                 if line.endswith('\n'): line = line[:-1]
                 if line == '': continue
                 self.process_command(line)

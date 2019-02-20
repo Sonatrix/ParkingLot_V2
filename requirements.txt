@@ -1,0 +1,8 @@
+click==7.0
+flask==1.0.2
+itsdangerous==1.1.0
+jinja2==2.10
+markupsafe==1.1.0
+pymysql==0.9.3
+sqlalchemy==1.2.18
+werkzeug==0.14.1
