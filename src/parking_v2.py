@@ -61,6 +61,7 @@ class Connection(object):
                 self.create_parking(slot_no=i,
                                     is_available=True)
             print(f"Created a parking lot with {no_of_slots} slots")
+            return True
         else:
             print("Invalid slot number is provided. Please enter valid slot number")
         return
@@ -99,7 +100,6 @@ class Connection(object):
                 result = cursor.fetchone()
 
                 slot_no = result.get("slot_no", None) if result is not None else None
-                print(slot_no)
                 return slot_no
 
         except Exception as ex:
@@ -179,7 +179,8 @@ class Connection(object):
         else:
             available_slot = self.get_nearest_available_slot()
             if available_slot is None:
-                return
+                print("Sorry, parking lot is full")
+                return "Sorry, parking lot is full"
 
             try:
                 with self.conn.cursor() as cursor:
@@ -187,10 +188,12 @@ class Connection(object):
                     sql = "UPDATE car_lot SET `reg_no`=%s, `is_available`= %s, `color`=%s WHERE `slot_no`=%s"
                     cursor.execute(sql, (reg_no, False, color, available_slot))
                     print(f"Allocated slot number: {available_slot}")
+                    return f"Allocated slot number: {available_slot}"
                 self.conn.commit()
 
             except Exception as ex:
                 print(f"Error in executing query {ex}")
+                return f"Error in executing query {ex}"
 
     def leave(self, slot_no):
         """Method to deallocate parking for car

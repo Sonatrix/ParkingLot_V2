@@ -1,6 +1,5 @@
 #!/usr/bin/python3.6
 import os, sys
-import parking
 import parking_v2
 from settings import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
@@ -24,6 +23,7 @@ class ParkingCommands(object):
                 line = file_obj.readline()
         except StopIteration:
             file_obj.close()
+            self.parking.close_connection()
         except Exception as ex:
             print(f"Error occured while processing file {repr(ex)}")
 

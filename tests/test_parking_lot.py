@@ -1,6 +1,6 @@
 import unittest
 import env
-from src import parking
+from src import parking_v2
 
 class TestParkingLot(unittest.TestCase):
     @classmethod
