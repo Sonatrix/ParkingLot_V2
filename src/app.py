@@ -1,7 +1,8 @@
 import parking_v2
+import json
 from settings import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 from flask import Flask
-from flask import request
+from flask import request, jsonify
 
 app = Flask(__name__)
 parking = parking_v2.Connection(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
@@ -9,8 +10,8 @@ conn = parking.get_conn()
 
 @app.route("/")
 def status():
-	response = parking.status()
-    return response
+    response = parking.status()
+    return jsonify(response)
 
 @app.route("/create_parking_lot", methods=['POST', 'GET'])
 def create_parking_lot():
