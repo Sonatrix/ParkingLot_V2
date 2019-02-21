@@ -29,21 +29,43 @@ class Connection(object):
             return False
         return True
 
-    def get_parking_status(self):
+    def status(self):
         """Method to get nearest parking lot
         """
         try:
+            print("Slot No\tRegistration No\tColour")
             with self.conn.cursor() as cursor:
                 # Read a single record
-                sql = "SELECT `id`, `reg_no`, `color`, `slot_no` FROM `car_lot`"
+                sql = "SELECT `slot_no`, `reg_no`, `color`  FROM `car_lot`"
                 cursor.execute(sql)
                 result = cursor.fetchall()
-                print(result)
+                
+                for parking in result:
+                    print("{slot_no}\t{reg_no}\t{color}".format(**parking))
+
                 return result
         except Exception as ex:
             print(f"Error while executing query {ex}")
+    
+    def create_parking_lot(self, no_of_slots):
+        """This method will create parking lot if not present already with given
+        number of slots.
+        Input: no_of_slots - Integer Type
+        """
+        self.clear_parking_lot()
 
-    def create_parking_lot(self, reg_no=None, color=None, is_available=True, slot_no=None):
+        no_of_slots = int(no_of_slots)
+
+        if no_of_slots > 0:
+            for i in range(1, no_of_slots+1):
+                self.create_parking(slot_no=i,
+                                    is_available=True)
+            print(f"Created a parking lot with {no_of_slots} slots")
+        else:
+            print("Invalid slot number is provided. Please enter valid slot number")
+        return
+
+    def create_parking(self, reg_no=None, color=None, is_available=True, slot_no=None):
         """Method to create parking lot
             Input: colour - String Type optional
             Input: reg_no - String Type optional
@@ -63,7 +85,7 @@ class Connection(object):
             return False
             print(f"Error while executing query {ex}")
     
-    def get_next_available_slot(self):
+    def get_nearest_available_slot(self):
         """Method to get nearest parking lot
         """
         if self.conn is None:
@@ -97,9 +119,9 @@ class Connection(object):
                 sql = "SELECT `reg_no` FROM `car_lot` WHERE `color`=%s and `is_available`=%s"
                 cursor.execute(sql, (color, False))
                 result = cursor.fetchall()
-                reg_nos = result if result is not None else None
-                print(result)
-                return result
+                reg_nos = " ".join([i['reg_no'] for i in result]) if result is not None else None
+                print(reg_nos)
+                return reg_nos
 
         except Exception as ex:
             print(f"Error in executing query {ex}")
@@ -118,9 +140,9 @@ class Connection(object):
                 sql = "SELECT `slot_no` FROM `car_lot` WHERE `color`=%s and `is_available`=%s"
                 cursor.execute(sql, (color, False))
                 result = cursor.fetchall()
-                slot_nos = result if result is not None else None
-                print(result)
-                return result
+                slot_nos = " ".join([str(i['slot_no']) for i in result]) if result is not None else "Not Found"
+                print(slot_nos)
+                return slot_nos
 
         except Exception as ex:
             print(f"Error in executing query {ex}")
@@ -138,38 +160,41 @@ class Connection(object):
                 # get the first record where slot is available
                 sql = "SELECT `slot_no` FROM `car_lot` WHERE `reg_no`=%s"
                 cursor.execute(sql, (reg_no))
-                result = cursor.fetchall()
-                slot_no = result if result is not None else None
-                print(result)
-                return result
-
+                result = cursor.fetchone()
+                slot_no = result['slot_no'] if result is not None else "Not Found"
+                print(slot_no)
+                return slot_no
+        
         except Exception as ex:
             print(f"Error in executing query {ex}")
 
-    def allocate_parking_lot(self, slot_no=None, reg_no=None, color=None):
+    def park(self, reg_no, color):
         """Method to allocate parking for car
-        Input: colour - String Type
-        Input: slot_no - Integer Type
+        Input: color - String Type
         Input: reg_no - String Type
         """
 
-        if self.conn is None or slot_no is None:
-            print("please try again")
+        if not self._do_primary_checks():
             return
         else:
+            available_slot = self.get_nearest_available_slot()
+            if available_slot is None:
+                return
+
             try:
                 with self.conn.cursor() as cursor:
                     # update details of parking
                     sql = "UPDATE car_lot SET `reg_no`=%s, `is_available`= %s, `color`=%s WHERE `slot_no`=%s"
-                    cursor.execute(sql, (reg_no, False, color, slot_no))
+                    cursor.execute(sql, (reg_no, False, color, available_slot))
+                    print(f"Allocated slot number: {available_slot}")
                 self.conn.commit()
 
             except Exception as ex:
                 print(f"Error in executing query {ex}")
 
-    def deallocate_parking_lot(self, reg_no):
+    def leave(self, slot_no):
         """Method to deallocate parking for car
-        Input: reg_no - String Type
+        Input: slot_no - String Type
         """
         if self.conn is None:
             print("No Connection exist")
@@ -178,9 +203,10 @@ class Connection(object):
             try:
                 with self.conn.cursor() as cursor:
                     # update details of parking
-                    sql = "UPDATE car_lot SET `reg_no`=%s, `is_available`= %s, `color`=%s WHERE `reg_no`=%s"
-                    cursor.execute(sql, ("", True, "", reg_no))
+                    sql = "UPDATE car_lot SET `reg_no`=%s, `is_available`= %s, `color`=%s WHERE `slot_no`=%s"
+                    cursor.execute(sql, ("", True, "", slot_no))
                 self.conn.commit()
+                print(f"Slot number {slot_no} is free")
 
             except Exception as ex:
                 print(f"Error in executing query {ex}")
@@ -209,23 +235,14 @@ class Connection(object):
 
 # connect = Connection(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
 # conn = connect.get_conn()
-# connect.get_parking_status()
-# connect.clear_parking_lot()
-# connect.create_parking_lot(slot_no=1)
-# connect.create_parking_lot(slot_no=2)
-# connect.create_parking_lot(slot_no=3)
-# connect.create_parking_lot(slot_no=4)
-# connect.allocate_parking_lot(reg_no="ABDSFC", color="White", slot_no=1)
-# connect.allocate_parking_lot(reg_no="ABDSFC1", color="Blue", slot_no=2)
-# connect.allocate_parking_lot(reg_no="ABDSFC2", color="White", slot_no=3)
-# connect.deallocate_parking_lot("ABDSFC1")
-# slot_available = connect.get_next_available_slot()
-# if slot_available is None:
-#     print("No slot is found")
-# else:
-#     print(slot_available)
-#     connect.allocate_parking_lot(reg_no="ABDSFC4", color="White", slot_no=slot_available)
-# #connect.get_parking_status()
+# connect.status()
+# connect.create_parking_lot(4)
+# connect.park("ABDSFC", "White")
+# connect.park("ABDSFC1","Blue")
+# connect.park("ABDSFC2", "White")
+# connect.leave(2)
+# connect.park("ABDSFC4", "White")
+# connect.status()
 # connect.registration_numbers_for_cars_with_color("White")
 # connect.slot_numbers_for_cars_with_color("White")
 # connect.slot_number_for_registration_number("ABDSFC2")

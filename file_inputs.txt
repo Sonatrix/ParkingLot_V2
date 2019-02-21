@@ -9,7 +9,7 @@ leave 4
 status
 park KA01P333 White
 park DL12AA9999 White
-registration_numbers_for_cars_with_colour White
-slot_numbers_for_cars_with_colour White
+registration_numbers_for_cars_with_color White
+slot_numbers_for_cars_with_color White
 slot_number_for_registration_number KA01HH3141
 slot_number_for_registration_number MH04AY1111

@@ -1,11 +1,14 @@
 #!/usr/bin/python3.6
 import os, sys
 import parking
+import parking_v2
+from settings import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
 class ParkingCommands(object):
 
     def __init__(self):
-        self.parking = parking.Parking()
+        self.parking = parking_v2.Connection(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
+        self.conn = self.parking.get_conn()
 
     def process_file(self, given_file):
         if not os.path.exists(given_file):
@@ -13,11 +16,12 @@ class ParkingCommands(object):
 
         file_obj = open(given_file)
         try:
-            while True:
-                line = file_obj.readline()
+            line = file_obj.readline()
+            while line:
                 if line.endswith('\n'): line = line[:-1]
                 if line == '': continue
                 self.process_command(line)
+                line = file_obj.readline()
         except StopIteration:
             file_obj.close()
         except Exception as ex:
