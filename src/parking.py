@@ -1,5 +1,4 @@
 import pymysql.cursors
-#from settings import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
 class Connection(object):
     """
@@ -210,6 +209,7 @@ class Connection(object):
                     cursor.execute(sql, ("", True, "", slot_no))
                 self.conn.commit()
                 print(f"Slot number {slot_no} is free")
+                return True
 
             except Exception as ex:
                 print(f"Error in executing query {ex}")
@@ -234,19 +234,3 @@ class Connection(object):
 
     def close_connection(self):
         self.conn.close()
-
-
-# connect = Connection(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
-# conn = connect.get_conn()
-# connect.status()
-# connect.create_parking_lot(4)
-# connect.park("ABDSFC", "White")
-# connect.park("ABDSFC1","Blue")
-# connect.park("ABDSFC2", "White")
-# connect.leave(2)
-# connect.park("ABDSFC4", "White")
-# connect.status()
-# connect.registration_numbers_for_cars_with_color("White")
-# connect.slot_numbers_for_cars_with_color("White")
-# connect.slot_number_for_registration_number("ABDSFC2")
-# connect.close_connection()

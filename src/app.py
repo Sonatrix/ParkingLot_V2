@@ -1,11 +1,17 @@
-import parking_v2
+import parking
 import json
-from settings import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+import os
 from flask import Flask
 from flask import request, jsonify
 
+DB_HOST = os.environ.get("DB_HOST")
+DB_PORT = int(os.environ.get("DB_PORT", 3306))
+DB_USER = os.environ.get("DB_USER")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_NAME = os.environ.get("DB_NAME")
+
 app = Flask(__name__)
-parking = parking_v2.Connection(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
+parking = parking.Connection(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
 conn = parking.get_conn()
 
 @app.route("/")
